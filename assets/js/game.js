@@ -64,27 +64,48 @@ var enemyInfo = [
 ];
 
 
+var fightOrSkip = function() {
+    // ask player if they'd like to fight or skip using fightOrSkip function
+    var promptFight = window.prompt('Would you like to FIGHT or SKIP this battle? Enter "FIGHT" or "SKIP" to choose.');
+    // set response to lowercase to test correctly
+    promptFight = promptFight.toLowerCase();
+    
+    // Conditional Recursive Function Call
+    if (promptFight === "" || promptFight === null) {
+        window.alert("You need to provide a valid answer! Please try again.");
+        return fightOrSkip();
+    }
+
+    // if player picks "skip" confirm and then stop the loop
+    if (promptFight === "skip") {
+        // confirm player wants to skip
+        var confirmSkip = window.confirm("Are you sure you'd like to quit?");
+
+        // if yes (true), leave fight
+        if (confirmSkip) {
+            window.alert(playerInfo.name + " has decided to skip this fight. Goodbye!");
+            // subtract money from playerMoney for skipping
+            playerInfo.playerMoney = playerInfo.money - 10;
+            
+            // return true if player wants to leave
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+
 // Fight Function
 var fight = function(enemy) { 
+    // repeat and execute as long as the player and enemy-robot is alive
     while(playerInfo.health > 0 && enemy.health > 0) {
-        // ask player if they'd like to fight or run
-        var promptFight = window.prompt("Would you like to FIGHT or SKIP this battle? Enter 'FIGHT' or 'SKIP' to choose.");
-        // To log value to Chrome DevTools
-        console.log(promptFight); 
-        // if player wants to skip 
-        if (promptFight === "skip" || promptFight === "SKIP") {
-            // confirm player wants to skip
-            var confirmSkip = window.confirm("Are you sure you'd like to quit?");
-            // if yes (true), leave fight
-            if (confirmSkip) {
-                window.alert(playerInfo.name + " has decided to skip this fight. Goodbye!");
-                // subtract money from playerInfo.money for skipping
-                playerInfo.money = Math.max(0, playerInfo.money - 10);
-                console.log("playerInfo.money", playerInfo.money); 
-                break;
-            }
+        // ask player if they'd like to fight or skip. If skip, break loop and start the fight. 
+        if(fightOrSkip()) {
+            // if true, leave fight by breaking loop
+            break;
         }
-        // now the fight is default if we don't hit that break^: 
+
         // remove enemy's health by subtracting the amount set in the playerInfo.attack variable
         // generate random damage value based on player's attack power
         var damage = randomNumber(playerInfo.attack - 3, playerInfo.attack);
@@ -133,16 +154,15 @@ var startGame = function() {
         if (playerInfo.health > 0) {
             // let player know what round they're in, remember arrays start at 0
             window.alert("Welcome to Robot Gladiators! Round " + (i + 1) );
-            
-            // pick new enemy to fight based on the index of the enemyNames array
+            // toggle through enemys using enemyInfo object
             var pickedEnemyObj = enemyInfo[i];
-            //reset enemyHealth before starting new fight
+            // reset enemyHealth before starting new fight
             pickedEnemyObj.health = randomNumber(40, 60);
-            // pass the pickedEnemyName variable's value into the fight function, where it will assume the value of the enemyName parameter
+            // pass the pickedEnemyObj variable's value into the fight function, where it will assume the value of the enemyInfo object
             fight(pickedEnemyObj);
-            //if player is still alive and we're not at the last enemy in the array
+            // if player is still alive *and* we're not at the last enemy in the array
             if (playerInfo.health > 0 && i < enemyInfo.length - 1) {
-                //ask if player wants to use the shop before next round
+                // ask if player wants to use the shop before next round
                 var storeConfirm = window.confirm("The fight is over, visit the store before next round?");
                 // if yes, take them to the store() function
                 if(storeConfirm) {
